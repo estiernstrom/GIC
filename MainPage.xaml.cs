@@ -143,6 +143,7 @@ namespace GIC
 
 
 
+
         private void OnSelectionChanged(object sender, SelectionChangedEventArgs e)
         {
             var selectedProductName = e.CurrentSelection.FirstOrDefault() as string; // Assuming the items are strings
