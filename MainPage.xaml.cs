@@ -294,9 +294,51 @@ namespace GIC
             // Find the product matching the search text (case-insensitive match)
             var selectedProduct = _allProducts.FirstOrDefault(p => p.Name.Equals(searchText, StringComparison.OrdinalIgnoreCase));
 
+            if (selectedProduct == null)
+            {
+                // No exact match found, perform fuzzy search
+                var bestMatch = Process.ExtractOne(searchText, _allProducts.Select(p => p.Name).ToList());
+
+                if (bestMatch != null && bestMatch.Score >= 80) // Adjust the score threshold as needed
+                {
+                    // Display a message suggesting the best match
+                    AmountOfHits.Text = $"Hittade 0 träffar på din sökning {searchText}.";
+                    DidYouMeanLabel.IsVisible = true;
+                    SuggestionLabel.Text = bestMatch.Value;
+                    SuggestionLabel.IsVisible = true; // Show the suggestion label
+                    return;
+                }
+                else
+                {
+                    // No close match found, display a message
+                    SearchResults.Text = $"No results found for '{searchText}'.";
+                    return;
+                }
+            }
+
             // Call the method to display the description
             DisplayDescription(selectedProduct);
         }
+
+        // Event handler for tapping on the suggestion label
+        private void OnSuggestionLabelTapped(object sender, EventArgs e)
+        {
+            string suggestionText = SuggestionLabel.Text?.Trim(); // Get the text from the suggestion label
+
+            if (!string.IsNullOrEmpty(suggestionText))
+            {
+                // Find the product matching the suggestion text (case-insensitive match)
+                var selectedProduct = _allProducts.FirstOrDefault(p => p.Name.Equals(suggestionText, StringComparison.OrdinalIgnoreCase));
+
+                if (selectedProduct != null)
+                {
+                    // Call the method to display the description
+                    DisplayDescription(selectedProduct);
+                }
+              
+            }
+        }
+
 
     }
 

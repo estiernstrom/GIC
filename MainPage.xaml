@@ -10,8 +10,14 @@
             <SearchBar x:Name="ProductSearchBar" TextChanged="OnTextChanged"/>
             <Label x:Name="DescriptionHeaderLabel" FontAttributes="Bold" IsVisible="False" Text="Åtgärd"/>
             <Label x:Name="SearchResults"  />
+            <Label x:Name="AmountOfHits" />
+            <Label x:Name="DidYouMeanLabel" Text="Menade du:" IsVisible="False"/>
             <Label x:Name="SuggestionLabel" TextColor="Blue">
+                <Label.GestureRecognizers>
+                    <TapGestureRecognizer Tapped="OnSuggestionLabelTapped" NumberOfTapsRequired="1" />
+                </Label.GestureRecognizers>
             </Label>
+
             <Button x:Name="SearchButton" Text="Search" Clicked="OnSearchButtonClicked" />
 
             <CollectionView x:Name="SuggestionResults" SelectionMode="Single" SelectionChanged="OnSelectionChanged" IsVisible="False">
