@@ -7,24 +7,35 @@ using Microsoft.Maui.Controls;
 using FuzzySharp;
 using GIC.Utilities;
 using GIC.Models;
+using System.ComponentModel;
+#if ANDROID
+using Android.Content;
 using Android.App.AppSearch;
+#endif
 
 
 namespace GIC
 {
     public partial class MainPage : ContentPage
     {
+
         private List<Product> _allProducts;
         private List<Description> _descriptions;
         private DatabaseService _databaseService;
         private TimeStampHelper _timeStampHelper;
+        private ColorStyling _colorStyling;
+
+        private PhoneCall phoneCallHelper;
 
         public MainPage()
         {
             InitializeComponent();
             _databaseService = new DatabaseService();
             _timeStampHelper = new TimeStampHelper();
+            _colorStyling = new ColorStyling();
+            phoneCallHelper = new PhoneCall();
             InitializeDataAsync();
+            
 
         }
 
@@ -57,8 +68,8 @@ namespace GIC
 
             // Always load the latest data from the JSON file
             await LoadDataFromJsonAsync();
+            ProductSearchBar.Focus();
         }
-
 
         private async Task LoadDataFromJsonAsync()
         {
@@ -102,6 +113,8 @@ namespace GIC
 
         public void OnTextChanged(object sender, TextChangedEventArgs e)
         {
+            DescriptionHeaderLabel.IsVisible = false;
+            DescriptionText.IsVisible = false;
             if (_allProducts == null)
             {
                 Console.WriteLine("Data not loaded, please check data initialization.");
@@ -113,18 +126,39 @@ namespace GIC
 
             // Update the ItemsSource for the CollectionView
             SuggestionResults.ItemsSource = searchResults;
+            
+
+            // Clear the selection if the search text is empty
+            if (string.IsNullOrEmpty(searchText))
+            {
+                // Construct HTML with dynamic background color
+                string htmlContent = $"<div style='background-color: {000}>";
+          
+               
+
+                // Set the HTML content of the WebView
+                DescriptionText.Source = new HtmlWebViewSource
+                {
+                    Html = htmlContent
+                };
+
+                SuggestionResults.SelectedItem = null;
+                DescriptionHeaderLabel.IsVisible = false;
+                DescriptionText.IsVisible = false;
+                SuggestionLabel.IsVisible = false;
+                DidYouMeanLabel.IsVisible = false;
+                AmountOfHits.IsVisible = false;
+            }
 
             // Set the visibility based on whether there are items to display
             SuggestionResults.IsVisible = searchResults.Any(); // This will be true if there are items, false otherwise
         }
 
-
-
         private List<string> SearchProducts(string searchText)
         {
             if (string.IsNullOrEmpty(searchText))
             {
-                SearchResults.Text = string.Empty;
+                DescriptionText.Source = string.Empty;
                 DescriptionHeaderLabel.IsVisible = false;
                 // Return an empty list if the search text is empty or null
                 return new List<string>();
@@ -143,45 +177,60 @@ namespace GIC
             if (selectedProduct == null)
             {
                 // Handle case where no product is selected
-                SearchResults.Text = "No product selected";
+                DescriptionText.Source = "No product selected";
                 return;
             }
 
-            // Find the description corresponding to the selected product's danger level
+            // Retrieve the corresponding description
             var matchingDescription = _descriptions.FirstOrDefault(d => d.DangerLevel == selectedProduct.DangerLevel);
+            string colorHex = _colorStyling.GetColorByDangerLevel(selectedProduct.DangerLevel);
 
             if (matchingDescription != null)
             {
-                // Display the description in the SearchResults label
-                SearchResults.Text = matchingDescription.DescriptionText;
+                // Construct HTML with dynamic background color
+                string htmlContent = $"<div style='background-color: {colorHex}; padding: 20px; Height: 250px; '>{matchingDescription.DescriptionText}</div>";
+
+                // Show the WebView
+                DescriptionText.IsVisible = true;
+                SuggestionResults.IsVisible = false;
+                DescriptionHeaderLabel.IsVisible = true;
+                AmountOfHits.IsVisible = true;
+                AmountOfHits.Text = $"Hittade 1 träff på din sökning {selectedProduct.Name}.";
+
+                // Set the HTML content of the WebView
+                DescriptionText.Source = new HtmlWebViewSource
+                {
+                    Html = htmlContent
+                };
             }
             else
             {
-                // Handle case where no description is found for the selected product's danger level
-                SearchResults.Text = "No description found";
+                // Handle case where no matching description is found
+                DescriptionText.Source = "No description available";
+                SuggestionResults.IsVisible = false;
             }
         }
 
-        private void OnSelectionChanged(object sender, SelectionChangedEventArgs e)
+
+
+        private void OnSelectedProductInList(object sender, SelectionChangedEventArgs e)
         {
             var selectedProductName = e.CurrentSelection.FirstOrDefault() as string; // Assuming the items are strings
 
             if (selectedProductName != null)
             {
+                ProductSearchBar.Text = selectedProductName;
                 // Find the selected product from the list of all products
                 var selectedProduct = _allProducts.FirstOrDefault(p => p.Name == selectedProductName);
 
                 // Call the method to display the description
                 DisplayDescription(selectedProduct);
             }
-            else
-            {
-                // Handle case where no product is selected
-                SearchResults.Text = "No product selected";
-            }
+           
 
             ProductSearchBar.Unfocus();
         }
+
 
         // Event handler for SearchButtonClicked
         private void OnSearchButtonClicked(object sender, EventArgs e)
@@ -189,7 +238,7 @@ namespace GIC
             string searchText = ProductSearchBar.Text?.Trim();  // Assuming you have a SearchBar named ProductSearchBar
             if (string.IsNullOrEmpty(searchText))
             {
-                SearchResults.Text = "Please enter a product name to search.";
+                DescriptionText.Source = "Please enter a product name to search.";
                 return;
             }
 
@@ -204,28 +253,32 @@ namespace GIC
                 if (bestMatch != null && bestMatch.Score >= 80) // Adjust the score threshold as needed
                 {
                     // Display a message suggesting the best match
+                    AmountOfHits.IsVisible = true;
                     AmountOfHits.Text = $"Hittade 0 träffar på din sökning {searchText}.";
                     DidYouMeanLabel.IsVisible = true;
                     SuggestionLabel.Text = bestMatch.Value;
                     SuggestionLabel.IsVisible = true; // Show the suggestion label
+                    SuggestionResults.IsVisible = false;
                     return;
                 }
                 else
                 {
                     // No close match found, display a message
-                    SearchResults.Text = $"No results found for '{searchText}'.";
+                    AmountOfHits.IsVisible = true;
+                    AmountOfHits.Text = $"Hittade 0 träffar på din sökning {searchText}.";
                     return;
                 }
             }
 
             // Call the method to display the description
             DisplayDescription(selectedProduct);
+            ProductSearchBar.Unfocus();
         }
 
         // Event handler for tapping on the suggestion label
         private void OnSuggestionLabelTapped(object sender, EventArgs e)
         {
-            string suggestionText = SuggestionLabel.Text?.Trim(); // Get the text from the suggestion label
+            string? suggestionText = SuggestionLabel.Text?.Trim(); // Get the text from the suggestion label
 
             if (!string.IsNullOrEmpty(suggestionText))
             {
@@ -235,11 +288,29 @@ namespace GIC
                 if (selectedProduct != null)
                 {
                     // Call the method to display the description
+                    ProductSearchBar.Text = selectedProduct.Name;
                     DisplayDescription(selectedProduct);
+                    SuggestionLabel.IsVisible = false;
+                    DidYouMeanLabel.IsVisible = false;
                 }
               
             }
         }
+
+
+
+
+        private async void EmergencyCallButton_Clicked(object sender, EventArgs e)
+        {
+            await phoneCallHelper.CallEmergencyNumber(this);
+        }
+
+
+        private async void NonEmergencyCallButton_Clicked(object sender, EventArgs e)
+        {
+            await phoneCallHelper.CallNonEmergencyNumber(this);
+        }
+
 
 
     }

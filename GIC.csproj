@@ -57,6 +57,10 @@
 	</ItemGroup>
 
 	<ItemGroup>
+	  <None Remove="Resources\Images\gic_logo.png" />
+	</ItemGroup>
+
+	<ItemGroup>
 		<PackageReference Include="FuzzySharp" Version="2.0.2" />
 		<PackageReference Include="Microsoft.Maui.Controls" Version="8.0.21" />
 		<PackageReference Include="Microsoft.Maui.Controls.Compatibility" Version="8.0.21" />

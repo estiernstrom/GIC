@@ -1,35 +1,114 @@
 ﻿<?xml version="1.0" encoding="utf-8" ?>
 <ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
-             x:Class="GIC.MainPage">
-
-    <ScrollView>
+             x:Class="GIC.MainPage"
+            Title="">
+    <Grid VerticalOptions="FillAndExpand">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="*"/>
+            <RowDefinition Height="Auto"/>
+        </Grid.RowDefinitions>
+        <ScrollView>
+        
         <VerticalStackLayout
             Padding="30,0"
             Spacing="0">
-            <SearchBar x:Name="ProductSearchBar" TextChanged="OnTextChanged"/>
-            <Label x:Name="DescriptionHeaderLabel" FontAttributes="Bold" IsVisible="False" Text="Åtgärd"/>
-            <Label x:Name="SearchResults"  />
-            <Label x:Name="AmountOfHits" />
-            <Label x:Name="DidYouMeanLabel" Text="Menade du:" IsVisible="False"/>
-            <Label x:Name="SuggestionLabel" TextColor="Blue">
+            <Image Source="gic_logo.png"
+                   Margin="0,20,0,20"/>
+            <Grid HorizontalOptions="CenterAndExpand">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="Auto"/>
+                    <ColumnDefinition Width="Auto"/>
+                </Grid.ColumnDefinitions>
+                <Border Grid.Column="0" Stroke="#143c64" StrokeThickness="1">
+                    <SearchBar x:Name="ProductSearchBar"
+                               Placeholder="Sök.."
+                               HeightRequest="40"
+                               WidthRequest="290"
+                               TextChanged="OnTextChanged"/>
+                </Border>
+                <Button Grid.Column="1" x:Name="SearchButton" 
+                        Text="Sök"
+                        CornerRadius="2"
+                        BackgroundColor="#d63868"
+                        WidthRequest="80"
+                        HeightRequest="42"
+                        TextColor="White"
+                        Clicked="OnSearchButtonClicked"/>   
+            </Grid>
+
+
+            <Label x:Name="AmountOfHits" 
+                   IsVisible="False" 
+                   Margin="0,10,0,0" />
+            <Label x:Name="DescriptionHeaderLabel" 
+                   FontAttributes="Bold" 
+                   IsVisible="False" 
+                   Text="Åtgärd"
+                   FontSize = "20"
+                   HorizontalOptions="Center"
+                   Margin="0,20,0,10"/>
+            <WebView x:Name="DescriptionText" 
+                     IsVisible="false"
+                     WidthRequest="385"></WebView>
+            <Label x:Name="DidYouMeanLabel" 
+                   Text="Menade du:" 
+                   IsVisible="False"/>
+            <Label x:Name="SuggestionLabel" 
+                   TextColor="Blue" 
+                   IsVisible="False"
+                   FontAttributes="Bold">
                 <Label.GestureRecognizers>
                     <TapGestureRecognizer Tapped="OnSuggestionLabelTapped" NumberOfTapsRequired="1" />
                 </Label.GestureRecognizers>
             </Label>
 
-            <Button x:Name="SearchButton" Text="Search" Clicked="OnSearchButtonClicked" />
-
-            <CollectionView x:Name="SuggestionResults" SelectionMode="Single" SelectionChanged="OnSelectionChanged" IsVisible="False">
-                <CollectionView.ItemTemplate>
-                    <DataTemplate>
-                        <Label Text="{Binding .}" />
-                        <!-- Assuming you're binding to a string -->
-                    </DataTemplate>
-                </CollectionView.ItemTemplate>
-            </CollectionView>
-
+            <Frame BorderColor="LightGray" Padding="10,2,10,10" Margin="10,0,90,0"   WidthRequest="290" HasShadow="False" CornerRadius="5" IsVisible="{Binding IsVisible, Source={x:Reference SuggestionResults}}">
+                <CollectionView x:Name="SuggestionResults" SelectionMode="Single" SelectionChanged="OnSelectedProductInList" IsVisible="False" MaximumHeightRequest="150">
+                    <CollectionView.ItemTemplate>
+                        <DataTemplate>
+                            <Grid>
+                                <VisualStateManager.VisualStateGroups>
+                                    <VisualStateGroupList>
+                                        <VisualStateGroup x:Name="CommonStates">
+                                            <VisualState x:Name="Normal" />
+                                            <VisualState x:Name="Selected">
+                                                <VisualState.Setters>
+                                                    <Setter Property="BackgroundColor" Value="Transparent" />
+                                                </VisualState.Setters>
+                                            </VisualState>
+                                        </VisualStateGroup>
+                                    </VisualStateGroupList>
+                                </VisualStateManager.VisualStateGroups>
+                                <Label Text="{Binding .}" />
+                            </Grid>
+                        </DataTemplate>
+                    </CollectionView.ItemTemplate>
+                </CollectionView>
+            </Frame>
+       
         </VerticalStackLayout>
+        
     </ScrollView>
-
+    <VerticalStackLayout Grid.Row="1" VerticalOptions="End">
+        <Button x:Name="NonEmergencyCallButton"
+                    Text="I mindre akuta fall 010-456 6700"
+                    BackgroundColor="#143c64"
+                    TextColor="White"
+                FontSize="20"
+                    Margin="10,0,10,0" 
+                HeightRequest="100"
+                 Clicked="NonEmergencyCallButton_Clicked" 
+                />
+        <Button x:Name="EmergencyCallButton"
+                    Text="När det är akut 112"
+                    BackgroundColor="#c41b1b"
+                    TextColor="White"
+                FontSize="20"
+                    Margin="10"
+                HeightRequest="100"
+                Clicked="EmergencyCallButton_Clicked"
+                />
+    </VerticalStackLayout>
+    </Grid>
 </ContentPage>
