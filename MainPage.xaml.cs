@@ -34,13 +34,20 @@ namespace GIC
             _timeStampHelper = new TimeStampHelper();
             _colorStyling = new ColorStyling();
             phoneCallHelper = new PhoneCall();
-            InitializeDataAsync();
+            _allProducts = new List<Product>();
+            _descriptions = new List<Description>();
+            InitializeAsync();
             
 
         }
-
+        private async void InitializeAsync()
+        {
+            await InitializeDataAsync();
+            // Other initialization code
+        }
         private async Task InitializeDataAsync()
         {
+            
             string jsonFilePath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "products.json");
 
             // Load the last known update timestamp
@@ -73,12 +80,16 @@ namespace GIC
 
         private async Task LoadDataFromJsonAsync()
         {
+            // Initialize _allProducts and _descriptions with empty lists
+            _allProducts = new List<Product>();
+            _descriptions = new List<Description>();
+
             // Load products data
             string productsJsonFilePath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "products.json");
             try
             {
                 string productsJsonData = await File.ReadAllTextAsync(productsJsonFilePath);
-                _allProducts = JsonConvert.DeserializeObject<List<Product>>(productsJsonData);
+                _allProducts = JsonConvert.DeserializeObject<List<Product>>(productsJsonData) ?? new List<Product>();
             }
             catch (IOException ex)
             {
@@ -96,7 +107,7 @@ namespace GIC
             try
             {
                 string descriptionsJsonData = await File.ReadAllTextAsync(descriptionsJsonFilePath);
-                _descriptions = JsonConvert.DeserializeObject<List<Description>>(descriptionsJsonData);
+                _descriptions = JsonConvert.DeserializeObject<List<Description>>(descriptionsJsonData) ?? new List<Description>();
                 // You can process the loaded descriptions as needed
             }
             catch (IOException ex)
@@ -110,6 +121,7 @@ namespace GIC
                 Console.WriteLine($"An error occurred while deserializing the descriptions JSON data: {ex.Message}");
             }
         }
+
 
         public void OnTextChanged(object sender, TextChangedEventArgs e)
         {
@@ -220,22 +232,32 @@ namespace GIC
             if (selectedProductName != null)
             {
                 ProductSearchBar.Text = selectedProductName;
+
                 // Find the selected product from the list of all products
                 var selectedProduct = _allProducts.FirstOrDefault(p => p.Name == selectedProductName);
 
-                // Call the method to display the description
-                DisplayDescription(selectedProduct);
+                // Check if selectedProduct is not null before calling DisplayDescription
+                if (selectedProduct != null)
+                {
+                    // Call the method to display the description
+                    DisplayDescription(selectedProduct);
+                }
+                else
+                {
+                    // Handle the case where selectedProduct is null (optional)
+                    // For example: show an error message or perform alternative action
+                }
             }
-           
 
             ProductSearchBar.Unfocus();
         }
 
 
+
         // Event handler for SearchButtonClicked
         private void OnSearchButtonClicked(object sender, EventArgs e)
         {
-            string searchText = ProductSearchBar.Text?.Trim();  // Assuming you have a SearchBar named ProductSearchBar
+            string? searchText = ProductSearchBar.Text?.Trim();  // Assuming you have a SearchBar named ProductSearchBar
             if (string.IsNullOrEmpty(searchText))
             {
                 DescriptionText.Source = "Please enter a product name to search.";

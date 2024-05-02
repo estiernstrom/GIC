@@ -19,18 +19,27 @@ namespace GIC
             // Default connection string for Windows and iOS
             ConnectionString = "Host=localhost;Port=5432;Username=postgres;Password=Edgar20230414!;Database=giftinformationscentralendb";
 
-#if ANDROID
-            // Connection string for Android emulator
-            ConnectionString = "Host=10.0.2.2;Port=5432;Username=postgres;Password=Edgar20230414!;Database=giftinformationscentralendb";
-#endif
+            // Check if running on an Android emulator or device
+            if (DeviceInfo.Platform == DevicePlatform.Android)
+            {
+                // Debug output to check the device model
+                System.Diagnostics.Debug.WriteLine($"Device model: {DeviceInfo.Model}");
+
+                if (DeviceInfo.Model.Contains("Emulator"))
+                {
+                    // Connection string for Android emulator
+                    ConnectionString = "Host=10.0.2.2;Port=5432;Username=postgres;Password=Edgar20230414!;Database=giftinformationscentralendb";
+                    System.Diagnostics.Debug.WriteLine("Detected Android Emulator.");
+                }
+                else
+                {
+                    // Connection string for Android physical device
+                    ConnectionString = "Host=192.168.0.125;Port=5432;Username=postgres;Password=Edgar20230414!;Database=giftinformationscentralendb";
+                    System.Diagnostics.Debug.WriteLine("Detected Android Physical Device.");
+                }
+            }
         }
 
-        public async Task<NpgsqlConnection> OpenConnectionAsync()
-        {
-            var connection = new NpgsqlConnection(ConnectionString);
-            await connection.OpenAsync();
-            return connection;
-        }
 
         // Method to fetch all data from database and cache it in a JSON file
         public async Task CacheDataAsync()
