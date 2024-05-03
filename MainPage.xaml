@@ -51,9 +51,7 @@
             <WebView x:Name="DescriptionText" 
                      IsVisible="false"
                      WidthRequest="385"></WebView>
-            <Label x:Name="DidYouMeanLabel" 
-                   Text="Menade du:" 
-                   IsVisible="False"/>
+          
             <Label x:Name="SuggestionLabel" 
                    TextColor="Blue" 
                    IsVisible="False"

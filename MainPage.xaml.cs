@@ -8,6 +8,7 @@ using FuzzySharp;
 using GIC.Utilities;
 using GIC.Models;
 using System.ComponentModel;
+using System.Text.RegularExpressions;
 #if ANDROID
 using Android.Content;
 using Android.App.AppSearch;
@@ -125,11 +126,12 @@ namespace GIC
 
         public void OnTextChanged(object sender, TextChangedEventArgs e)
         {
+            AmountOfHits.IsVisible = false;
             DescriptionHeaderLabel.IsVisible = false;
             DescriptionText.IsVisible = false;
             if (_allProducts == null)
             {
-                Console.WriteLine("Data not loaded, please check data initialization.");
+                
                 return;
             }
 
@@ -158,7 +160,7 @@ namespace GIC
                 DescriptionHeaderLabel.IsVisible = false;
                 DescriptionText.IsVisible = false;
                 SuggestionLabel.IsVisible = false;
-                DidYouMeanLabel.IsVisible = false;
+               
                 AmountOfHits.IsVisible = false;
             }
 
@@ -255,47 +257,47 @@ namespace GIC
 
 
         // Event handler for SearchButtonClicked
-        private void OnSearchButtonClicked(object sender, EventArgs e)
-        {
-            string? searchText = ProductSearchBar.Text?.Trim();  // Assuming you have a SearchBar named ProductSearchBar
-            if (string.IsNullOrEmpty(searchText))
-            {
-                DescriptionText.Source = "Please enter a product name to search.";
-                return;
-            }
+        //private void OnSearchButtonClicked(object sender, EventArgs e)
+        //{
+        //    string? searchText = ProductSearchBar.Text?.Trim();  // Assuming you have a SearchBar named ProductSearchBar
+        //    if (string.IsNullOrEmpty(searchText))
+        //    {
+        //        DescriptionText.Source = "Please enter a product name to search.";
+        //        return;
+        //    }
 
-            // Find the product matching the search text (case-insensitive match)
-            var selectedProduct = _allProducts.FirstOrDefault(p => p.Name.Equals(searchText, StringComparison.OrdinalIgnoreCase));
+        //    // Find the product matching the search text (case-insensitive match)
+        //    var selectedProduct = _allProducts.FirstOrDefault(p => p.Name.Equals(searchText, StringComparison.OrdinalIgnoreCase));
 
-            if (selectedProduct == null)
-            {
-                // No exact match found, perform fuzzy search
-                var bestMatch = Process.ExtractOne(searchText, _allProducts.Select(p => p.Name).ToList());
+        //    if (selectedProduct == null)
+        //    {
+        //        // No exact match found, perform fuzzy search
+        //        var bestMatch = Process.ExtractOne(searchText, _allProducts.Select(p => p.Name).ToList());
 
-                if (bestMatch != null && bestMatch.Score >= 80) // Adjust the score threshold as needed
-                {
-                    // Display a message suggesting the best match
-                    AmountOfHits.IsVisible = true;
-                    AmountOfHits.Text = $"Hittade 0 träffar på din sökning {searchText}.";
-                    DidYouMeanLabel.IsVisible = true;
-                    SuggestionLabel.Text = bestMatch.Value;
-                    SuggestionLabel.IsVisible = true; // Show the suggestion label
-                    SuggestionResults.IsVisible = false;
-                    return;
-                }
-                else
-                {
-                    // No close match found, display a message
-                    AmountOfHits.IsVisible = true;
-                    AmountOfHits.Text = $"Hittade 0 träffar på din sökning {searchText}.";
-                    return;
-                }
-            }
+        //        if (bestMatch != null && bestMatch.Score >= 80) // Adjust the score threshold as needed
+        //        {
+        //            // Display a message suggesting the best match
+        //            AmountOfHits.IsVisible = true;
+        //            AmountOfHits.Text = $"Hittade 0 träffar på din sökning {searchText}.";
+        //            DidYouMeanLabel.IsVisible = true;
+        //            SuggestionLabel.Text = bestMatch.Value;
+        //            SuggestionLabel.IsVisible = true; // Show the suggestion label
+        //            SuggestionResults.IsVisible = false;
+        //            return;
+        //        }
+        //        else
+        //        {
+        //            // No close match found, display a message
+        //            AmountOfHits.IsVisible = true;
+        //            AmountOfHits.Text = $"Hittade 0 träffar på din sökning {searchText}.";
+        //            return;
+        //        }
+        //    }
 
-            // Call the method to display the description
-            DisplayDescription(selectedProduct);
-            ProductSearchBar.Unfocus();
-        }
+        //    // Call the method to display the description
+        //    DisplayDescription(selectedProduct);
+        //    ProductSearchBar.Unfocus();
+        //}
 
         // Event handler for tapping on the suggestion label
         private void OnSuggestionLabelTapped(object sender, EventArgs e)
@@ -313,7 +315,7 @@ namespace GIC
                     ProductSearchBar.Text = selectedProduct.Name;
                     DisplayDescription(selectedProduct);
                     SuggestionLabel.IsVisible = false;
-                    DidYouMeanLabel.IsVisible = false;
+                   
                 }
               
             }
@@ -334,6 +336,110 @@ namespace GIC
         }
 
 
+        private void OnSearchButtonClicked(object sender, EventArgs e)
+        {
+            string searchText = ProductSearchBar.Text?.Trim();  // Assuming you have a SearchBar named ProductSearchBar
+            if (string.IsNullOrEmpty(searchText))
+            {
+                AmountOfHits.IsVisible = true;
+                AmountOfHits.Text = "Vänligen ange en sökterm för att utföra en sökning.";
+                return;
+            }
+
+            // Use Levenshtein distance to find the best matches
+            var matches = SearchProductsUsingLevenshteinAndConcat(searchText);
+
+            if (matches.Count == 0)
+            {
+                // No matches found, display a message
+                AmountOfHits.IsVisible = true;
+                AmountOfHits.Text = $"Hittade 0 träffar på din sökning: {searchText}.";
+                
+                SuggestionLabel.IsVisible = false;
+                SuggestionResults.IsVisible = false;
+                ProductSearchBar.Focus();
+            }
+            else if (matches.Count == 1)
+            {
+                // One match found, display its description
+                DisplayDescription(_allProducts.FirstOrDefault(p => p.Name == matches.First()));
+            }
+            else
+            {
+                // Multiple matches found, suggest the top matches
+                SuggestionResults.ItemsSource = matches;
+                SuggestionResults.IsVisible = true;
+              
+                AmountOfHits.IsVisible = true;
+                AmountOfHits.Text = $"Hittade {matches.Count} matchningar på din sökning:";
+            }
+
+            ProductSearchBar.Unfocus();
+        }
+
+        private List<string> SearchProductsUsingLevenshteinAndConcat(string searchText)
+        {
+            searchText = NormalizeText(searchText); // Normalize the search text
+            string concatenatedSearchText = searchText.Replace(" ", ""); // Remove spaces for concatenated matching
+
+            return _allProducts
+                .Select(p => new {
+                    Product = p,
+                    NormalizedName = NormalizeText(p.Name), // Normalize each product name
+                    ConcatenatedName = NormalizeText(p.Name).Replace(" ", "") // Remove spaces
+                })
+                .Where(p => {
+                    int levenshteinDist = LevenshteinDistance(searchText, p.NormalizedName);
+                    int concatLevenshteinDist = LevenshteinDistance(concatenatedSearchText, p.ConcatenatedName);
+                    bool isSubstring = p.NormalizedName.Contains(searchText);
+                    return levenshteinDist <= 3 || concatLevenshteinDist <= 3 || isSubstring;
+                })
+                .OrderBy(p => Math.Min(LevenshteinDistance(searchText, p.NormalizedName), LevenshteinDistance(concatenatedSearchText, p.ConcatenatedName)))
+                .Select(p => p.Product.Name)
+                .ToList();
+        }
+
+
+        // Helper method to normalize text by removing extra spaces and converting to lower case
+        private string NormalizeText(string input)
+        {
+            if (string.IsNullOrEmpty(input)) return input;
+            return Regex.Replace(input.Trim(), @"\s+", " ").ToLower();
+        }
+
+        private int LevenshteinDistance(string source, string target)
+        {
+            if (string.IsNullOrEmpty(source))
+            {
+                if (string.IsNullOrEmpty(target)) return 0;
+                else return target.Length;
+            }
+            if (string.IsNullOrEmpty(target)) return source.Length;
+
+            int sourceLength = source.Length;
+            int targetLength = target.Length;
+            int[,] distance = new int[sourceLength + 1, targetLength + 1];
+
+            // Step 1: Initialize the first row and first column.
+            for (int i = 0; i <= sourceLength; distance[i, 0] = i++) { }
+            for (int j = 0; j <= targetLength; distance[0, j] = j++) { }
+
+            // Step 2: Fill in the distance matrix.
+            for (int i = 1; i <= sourceLength; i++)
+            {
+                for (int j = 1; j <= targetLength; j++)
+                {
+                    int cost = (target[j - 1] == source[i - 1]) ? 0 : 1;
+
+                    distance[i, j] = Math.Min(
+                        Math.Min(distance[i - 1, j] + 1,    // Deletion
+                                 distance[i, j - 1] + 1),   // Insertion
+                        distance[i - 1, j - 1] + cost);    // Substitution
+                }
+            }
+
+            return distance[sourceLength, targetLength];
+        }
 
     }
 
