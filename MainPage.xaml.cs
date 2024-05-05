@@ -377,27 +377,36 @@ namespace GIC
             ProductSearchBar.Unfocus();
         }
 
-        private List<string> SearchProductsUsingLevenshteinAndConcat(string searchText)
-        {
-            searchText = NormalizeText(searchText); // Normalize the search text
-            string concatenatedSearchText = searchText.Replace(" ", ""); // Remove spaces for concatenated matching
+     private List<string> SearchProductsUsingLevenshteinAndConcat(string searchText)
+{
+    searchText = NormalizeText(searchText);
+    string concatenatedSearchText = searchText.Replace(" ", "");
 
-            return _allProducts
-                .Select(p => new {
-                    Product = p,
-                    NormalizedName = NormalizeText(p.Name), // Normalize each product name
-                    ConcatenatedName = NormalizeText(p.Name).Replace(" ", "") // Remove spaces
-                })
-                .Where(p => {
-                    int levenshteinDist = LevenshteinDistance(searchText, p.NormalizedName);
-                    int concatLevenshteinDist = LevenshteinDistance(concatenatedSearchText, p.ConcatenatedName);
-                    bool isSubstring = p.NormalizedName.Contains(searchText);
-                    return levenshteinDist <= 3 || concatLevenshteinDist <= 3 || isSubstring;
-                })
-                .OrderBy(p => Math.Min(LevenshteinDistance(searchText, p.NormalizedName), LevenshteinDistance(concatenatedSearchText, p.ConcatenatedName)))
-                .Select(p => p.Product.Name)
-                .ToList();
-        }
+    int baseDistanceThreshold = 3; // Base threshold for Levenshtein distance
+    int flexibilityFactor = searchText.Length <= 2 ? 2 : 0; // Additional flexibility for very short search terms
+
+    return _allProducts
+        .Select(p => new {
+            Product = p,
+            NormalizedName = NormalizeText(p.Name),
+            ConcatenatedName = NormalizeText(p.Name).Replace(" ", "")
+        })
+        .Where(p => {
+            int levenshteinDist = LevenshteinDistance(searchText, p.NormalizedName);
+            int concatLevenshteinDist = LevenshteinDistance(concatenatedSearchText, p.ConcatenatedName);
+            bool isSubstring = p.NormalizedName.Contains(searchText) || p.ConcatenatedName.Contains(concatenatedSearchText);
+
+            // Apply both checks: Must contain substring and Levenshtein distance must be within adjusted threshold
+            return isSubstring && (levenshteinDist <= baseDistanceThreshold + flexibilityFactor || 
+                                   concatLevenshteinDist <= baseDistanceThreshold + flexibilityFactor);
+        })
+        .OrderBy(p => Math.Min(LevenshteinDistance(searchText, p.NormalizedName), 
+                               LevenshteinDistance(concatenatedSearchText, p.ConcatenatedName)))
+        .Select(p => p.Product.Name)
+        .ToList();
+}
+
+
 
 
         // Helper method to normalize text by removing extra spaces and converting to lower case
