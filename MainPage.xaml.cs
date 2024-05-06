@@ -349,16 +349,17 @@ namespace GIC
             // Use Levenshtein distance to find the best matches
             var matches = SearchProductsUsingLevenshteinAndConcat(searchText);
 
-            //if (matches.Count == 0)
-            //{
-            //    // No matches found, display a message
-            //    AmountOfHits.IsVisible = true;
-            //    AmountOfHits.Text = $"Hittade 0 träffar på din sökning: {searchText}.";
 
-            //    SuggestionLabel.IsVisible = false;
-            //    SuggestionResults.IsVisible = false;
-            //    ProductSearchBar.Focus();
-            //}
+            if (matches.Count == 0)
+            {
+                // No matches found, display a message
+                AmountOfHits.IsVisible = true;
+                AmountOfHits.Text = $"Hittade 0 träffar på din sökning: {searchText}.";
+
+                SuggestionLabel.IsVisible = false;
+                SuggestionResults.IsVisible = false;
+                ProductSearchBar.Focus();
+            }
             if (matches.Count == 1)
             {
                 // One match found, display its description
@@ -382,7 +383,8 @@ namespace GIC
                     SuggestionResults.ItemsSource = typoSuggestions;
                     SuggestionResults.IsVisible = true;
                     AmountOfHits.IsVisible = true;
-                    AmountOfHits.Text = "Did you mean: " + typoSuggestions.First() + "?";
+                    AmountOfHits.Text = $"Ingen träff på din sökning \"{searchText}\" menade du: ";
+
                 }
             }
             ProductSearchBar.Unfocus();
@@ -398,7 +400,8 @@ namespace GIC
         private List<string> SearchProductsUsingLevenshteinAndConcat(string searchText)
         {
             searchText = NormalizeText(searchText);
-            string concatenatedSearchText = searchText.Replace(" ", "");
+            //string concatenatedSearchText = searchText.Replace(" ", "");
+            string concatenatedSearchText = searchText.Replace(" ", "").Replace("-", "").Replace("(", "").Replace(")", "");
             int maxResults = searchText.Length <= 1 ? 5 : 10;  // Use 5 for very short inputs, 10 otherwise
 
             var products = _allProducts.Select(p => new FilteredProduct
@@ -435,7 +438,7 @@ namespace GIC
             {
                 // If there's exactly one match and it is an exact match, display its description
                 DisplayDescription(filteredProducts.First().Product);
-                return new List<string>(); // Return empty list as no need for further suggestions.
+              /*  return new List<string>();*/ // Return empty list as no need for further suggestions.
             }
 
             // Return suggestions based on the closest Levenshtein matches
