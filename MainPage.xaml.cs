@@ -349,22 +349,22 @@ namespace GIC
             // Use Levenshtein distance to find the best matches
             var matches = SearchProductsUsingLevenshteinAndConcat(searchText);
 
-            if (matches.Count == 0)
-            {
-                // No matches found, display a message
-                AmountOfHits.IsVisible = true;
-                AmountOfHits.Text = $"Hittade 0 träffar på din sökning: {searchText}.";
-                
-                SuggestionLabel.IsVisible = false;
-                SuggestionResults.IsVisible = false;
-                ProductSearchBar.Focus();
-            }
-            else if (matches.Count == 1)
+            //if (matches.Count == 0)
+            //{
+            //    // No matches found, display a message
+            //    AmountOfHits.IsVisible = true;
+            //    AmountOfHits.Text = $"Hittade 0 träffar på din sökning: {searchText}.";
+
+            //    SuggestionLabel.IsVisible = false;
+            //    SuggestionResults.IsVisible = false;
+            //    ProductSearchBar.Focus();
+            //}
+            if (matches.Count == 1)
             {
                 // One match found, display its description
                 DisplayDescription(_allProducts.FirstOrDefault(p => p.Name == matches.First()));
             }
-            else
+            else if(matches.Count > 1) 
             {
                 // Multiple matches found, suggest the top matches
                 SuggestionResults.ItemsSource = matches;
@@ -373,38 +373,101 @@ namespace GIC
                 AmountOfHits.IsVisible = true;
                 AmountOfHits.Text = $"Hittade {matches.Count} matchningar på din sökning:";
             }
-
+            else
+            {
+                // Call the typo suggestion method if no results are found
+                var typoSuggestions = SuggestCorrectionsIfTypo(searchText, _allProducts);
+                if (typoSuggestions.Any())
+                {
+                    SuggestionResults.ItemsSource = typoSuggestions;
+                    SuggestionResults.IsVisible = true;
+                    AmountOfHits.IsVisible = true;
+                    AmountOfHits.Text = "Did you mean: " + typoSuggestions.First() + "?";
+                }
+            }
             ProductSearchBar.Unfocus();
         }
 
-     private List<string> SearchProductsUsingLevenshteinAndConcat(string searchText)
-{
-    searchText = NormalizeText(searchText);
-    string concatenatedSearchText = searchText.Replace(" ", "");
+        private class FilteredProduct
+        {
+            public string NormalizedName { get; set; }
+            public int LevenshteinScore { get; set; }
+            public Product Product { get; set; } // Assuming Product is the type of items in _allProducts
+        }
 
-    int baseDistanceThreshold = 3; // Base threshold for Levenshtein distance
-    int flexibilityFactor = searchText.Length <= 2 ? 2 : 0; // Additional flexibility for very short search terms
+        private List<string> SearchProductsUsingLevenshteinAndConcat(string searchText)
+        {
+            searchText = NormalizeText(searchText);
+            string concatenatedSearchText = searchText.Replace(" ", "");
+            int maxResults = searchText.Length <= 1 ? 5 : 10;  // Use 5 for very short inputs, 10 otherwise
 
-    return _allProducts
-        .Select(p => new {
-            Product = p,
-            NormalizedName = NormalizeText(p.Name),
-            ConcatenatedName = NormalizeText(p.Name).Replace(" ", "")
-        })
-        .Where(p => {
-            int levenshteinDist = LevenshteinDistance(searchText, p.NormalizedName);
-            int concatLevenshteinDist = LevenshteinDistance(concatenatedSearchText, p.ConcatenatedName);
-            bool isSubstring = p.NormalizedName.Contains(searchText) || p.ConcatenatedName.Contains(concatenatedSearchText);
+            var products = _allProducts.Select(p => new FilteredProduct
+            {
+                Product = p,
+                NormalizedName = NormalizeText(p.Name),  // Normalize the name here for use within this scope
+                LevenshteinScore = LevenshteinDistance(searchText, NormalizeText(p.Name))  // Calculate Levenshtein distance here
+            }).ToList();
 
-            // Apply both checks: Must contain substring and Levenshtein distance must be within adjusted threshold
-            return isSubstring && (levenshteinDist <= baseDistanceThreshold + flexibilityFactor || 
-                                   concatLevenshteinDist <= baseDistanceThreshold + flexibilityFactor);
-        })
-        .OrderBy(p => Math.Min(LevenshteinDistance(searchText, p.NormalizedName), 
-                               LevenshteinDistance(concatenatedSearchText, p.ConcatenatedName)))
-        .Select(p => p.Product.Name)
-        .ToList();
-}
+            List<FilteredProduct> filteredProducts;  // Use the defined class
+
+            if (searchText.Length <= 2)
+            {
+                // For very short inputs, prioritize products starting with the search text
+                filteredProducts = products
+                    .Where(p => p.NormalizedName.StartsWith(searchText))
+                    .OrderBy(p => p.LevenshteinScore)
+                    .ThenBy(p => p.NormalizedName)
+                    .Take(maxResults)
+                    .ToList();
+            }
+            else
+            {
+                // For longer inputs, include any products containing the search text as a substring
+                filteredProducts = products
+                    .Where(p => p.NormalizedName.Contains(searchText))
+                    .OrderBy(p => p.LevenshteinScore)
+                    .ThenBy(p => p.NormalizedName)
+                    .Take(maxResults)
+                    .ToList();
+            }
+
+            if (filteredProducts.Count == 1 && filteredProducts.First().NormalizedName == searchText)
+            {
+                // If there's exactly one match and it is an exact match, display its description
+                DisplayDescription(filteredProducts.First().Product);
+                return new List<string>(); // Return empty list as no need for further suggestions.
+            }
+
+            // Return suggestions based on the closest Levenshtein matches
+            return filteredProducts.Select(p => p.Product.Name).Distinct().ToList();
+        }
+
+
+
+        private List<string> SuggestCorrectionsIfTypo(string searchText, List<Product> allProducts)
+        {
+            var potentialMatches = allProducts.Select(p => new {
+                Product = p,
+                NormalizedName = NormalizeText(p.Name),
+                LevenshteinScore = LevenshteinDistance(searchText, NormalizeText(p.Name))
+            }).ToList();
+
+            // Find the minimum Levenshtein score that is reasonably close but not zero (exact match)
+            int minDistance = potentialMatches.Min(p => p.LevenshteinScore);
+            if (minDistance > 0 && minDistance <= searchText.Length / 2) // Threshold for typo suggestion
+            {
+                var bestMatches = potentialMatches
+                    .Where(p => p.LevenshteinScore == minDistance)
+                    .OrderBy(p => p.Product.Name.Length)  // Favor shorter names if scores are tied
+                    .Select(p => p.Product.Name)
+                    .Take(1)  // We suggest only the best match
+                    .ToList();
+
+                return bestMatches;  // This will have the single best suggestion or be empty
+            }
+
+            return new List<string>();  // No reasonable typo corrections found
+        }
 
 
 
