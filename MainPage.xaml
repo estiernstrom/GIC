@@ -11,7 +11,7 @@
         <ScrollView>
         
         <VerticalStackLayout
-            Padding="30,0"
+            Padding="10,0"
             Spacing="0">
             <Image Source="gic_logo.png"
                    Margin="0,20,0,20"/>
@@ -22,47 +22,61 @@
                 </Grid.ColumnDefinitions>
                 <Border Grid.Column="0" Stroke="#143c64" StrokeThickness="1">
                     <SearchBar x:Name="ProductSearchBar"
-                               Placeholder="Sök.."
+                               Placeholder="Sök produkt . . ."
                                HeightRequest="40"
                                WidthRequest="290"
-                               TextChanged="OnTextChanged"/>
+                               TextChanged="OnTextChanged"
+                               FontSize="25"
+                               />
                 </Border>
                 <Button Grid.Column="1" x:Name="SearchButton" 
                         Text="Sök"
                         CornerRadius="2"
                         BackgroundColor="#d63868"
                         WidthRequest="80"
-                        HeightRequest="42"
+                        HeightRequest="50"
                         TextColor="White"
-                        Clicked="OnSearchButtonClicked"/>   
+                        Clicked="OnSearchButtonClicked"
+                        FontSize="25"
+                        Padding="0"
+                        />   
             </Grid>
 
 
             <Label x:Name="AmountOfHits" 
                    IsVisible="False" 
-                   Margin="0,10,0,0" />
+                   Margin="0,10,0,10" 
+                     FontSize="15" Shadow="{StaticResource MyShadowStyle}"
+                   />
             <Label x:Name="DescriptionHeaderLabel" 
                    FontAttributes="Bold" 
                    IsVisible="False" 
                    Text="Åtgärd"
                    FontSize = "20"
                    HorizontalOptions="Center"
-                   Margin="0,20,0,10"/>
-            <WebView x:Name="DescriptionText" 
-                     IsVisible="false"
-                     WidthRequest="385"></WebView>
+                   Margin="0,20,0,10"
+                   
+                   />
+            
+                <WebView x:Name="DescriptionText" 
+                         IsVisible="false"
+                         WidthRequest="385"
+                         Navigating="OnNavigating">
+                </WebView>
           
             <Label x:Name="SuggestionLabel" 
                    TextColor="Blue" 
                    IsVisible="False"
-                   FontAttributes="Bold">
+                   FontAttributes="Bold"
+                     FontSize="25"
+                   >
                 <Label.GestureRecognizers>
                     <TapGestureRecognizer Tapped="OnSuggestionLabelTapped" NumberOfTapsRequired="1" />
                 </Label.GestureRecognizers>
             </Label>
 
             <Frame BorderColor="LightGray" Padding="10,2,10,10" Margin="10,0,90,0"   WidthRequest="290" HasShadow="False" CornerRadius="5" IsVisible="{Binding IsVisible, Source={x:Reference SuggestionResults}}">
-                <CollectionView x:Name="SuggestionResults" SelectionMode="Single" SelectionChanged="OnSelectedProductInList" IsVisible="False" MaximumHeightRequest="150">
+                <CollectionView x:Name="SuggestionResults" SelectionMode="Single" SelectionChanged="OnSelectedProductInList" IsVisible="False" MaximumHeightRequest="250">
                     <CollectionView.ItemTemplate>
                         <DataTemplate>
                             <Grid>
@@ -78,7 +92,7 @@
                                         </VisualStateGroup>
                                     </VisualStateGroupList>
                                 </VisualStateManager.VisualStateGroups>
-                                <Label Text="{Binding .}" />
+                                <Label Text="{Binding .}" FontSize="25" />
                             </Grid>
                         </DataTemplate>
                     </CollectionView.ItemTemplate>
@@ -88,25 +102,53 @@
         </VerticalStackLayout>
         
     </ScrollView>
-    <VerticalStackLayout Grid.Row="1" VerticalOptions="End">
-        <Button x:Name="NonEmergencyCallButton"
-                    Text="I mindre akuta fall 010-456 6700"
-                    BackgroundColor="#143c64"
-                    TextColor="White"
-                FontSize="20"
-                    Margin="10,0,10,0" 
-                HeightRequest="100"
-                 Clicked="NonEmergencyCallButton_Clicked" 
-                />
-        <Button x:Name="EmergencyCallButton"
-                    Text="När det är akut 112"
-                    BackgroundColor="#c41b1b"
-                    TextColor="White"
-                FontSize="20"
-                    Margin="10"
-                HeightRequest="100"
-                Clicked="EmergencyCallButton_Clicked"
-                />
-    </VerticalStackLayout>
+        <VerticalStackLayout Grid.Row="1" VerticalOptions="End">
+            <Frame CornerRadius="5" BackgroundColor="#143c64" Padding="0,10,0,10" Margin="10"
+           HasShadow="true" Shadow="{StaticResource MyShadowStyle}">
+                <Grid HeightRequest="60" VerticalOptions="Center">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="60"/>
+                        <ColumnDefinition Width="*"/>
+                    </Grid.ColumnDefinitions>
+                    <Image Source="phone.png" WidthRequest="40" HeightRequest="40" Aspect="AspectFit" Grid.Column="0" Margin="20,0,0,0"/>
+                    <Label Grid.Column="1" VerticalOptions="Center" TextColor="White" FontSize="20" Padding="20,0,0,0">
+                        <Label.FormattedText>
+                            <FormattedString>
+                                <Span Text="Ring Giftinformationscentralen: " TextColor="White"/>
+                                <Span Text="010-456 6700" TextDecorations="Underline" TextColor="White"/>
+                            </FormattedString>
+                        </Label.FormattedText>
+                    </Label>
+                    <Grid.GestureRecognizers>
+                        <TapGestureRecognizer Tapped="NonEmergencyCallButton_Clicked"/>
+                    </Grid.GestureRecognizers>
+                </Grid>
+            </Frame>
+
+
+
+            <!-- Custom Button for Emergency Calls -->
+            <Frame CornerRadius="5" BackgroundColor="#c41b1b" Padding="10" Margin="10" HasShadow="true" Shadow="{StaticResource MyShadowStyle}">
+                <Grid HeightRequest="60" VerticalOptions="Center" Padding="0,10,0,10">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="Auto"/>
+                        <ColumnDefinition Width="*"/>
+                    </Grid.ColumnDefinitions>
+                    <Image Source="phone.png" WidthRequest="40" HeightRequest="40" Aspect="AspectFit" Grid.Column="0" Margin="20,0,0,0"/>
+                    <Label Grid.Column="1" VerticalOptions="Center" TextColor="White" FontSize="20" Padding="20,0,0,0">
+                        <Label.FormattedText>
+                            <FormattedString>
+                                <Span Text="Ring SOS-Alarm: " TextColor="White"/>
+                                <Span Text="112" TextDecorations="Underline" TextColor="White"/>
+                            </FormattedString>
+                        </Label.FormattedText>
+                    </Label>
+                    <Grid.GestureRecognizers>
+                        <TapGestureRecognizer Tapped="EmergencyCallButton_Clicked"/>
+                    </Grid.GestureRecognizers>
+                </Grid>
+            </Frame>
+        </VerticalStackLayout>
+
     </Grid>
 </ContentPage>

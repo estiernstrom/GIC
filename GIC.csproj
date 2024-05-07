@@ -58,10 +58,12 @@
 
 	<ItemGroup>
 	  <None Remove="Resources\Images\gic_logo.png" />
+	  <None Remove="Resources\Images\phone.png" />
 	</ItemGroup>
 
 	<ItemGroup>
 		<PackageReference Include="FuzzySharp" Version="2.0.2" />
+		<PackageReference Include="HtmlAgilityPack" Version="1.11.61" />
 		<PackageReference Include="Microsoft.Maui.Controls" Version="8.0.21" />
 		<PackageReference Include="Microsoft.Maui.Controls.Compatibility" Version="8.0.21" />
 		<PackageReference Include="Microsoft.Extensions.Logging.Debug" Version="8.0.0" />

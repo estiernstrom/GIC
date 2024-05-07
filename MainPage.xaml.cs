@@ -195,14 +195,24 @@ namespace GIC
                 return;
             }
 
-            // Retrieve the corresponding description
             var matchingDescription = _descriptions.FirstOrDefault(d => d.DangerLevel == selectedProduct.DangerLevel);
             string colorHex = _colorStyling.GetColorByDangerLevel(selectedProduct.DangerLevel);
 
             if (matchingDescription != null)
             {
-                // Construct HTML with dynamic background color
-                string htmlContent = $"<div style='background-color: {colorHex}; padding: 20px; Height: 250px; '>{matchingDescription.DescriptionText}</div>";
+                // Construct HTML with dynamic background color and potentially a link
+                string linkHtml = "";
+                if (selectedProduct.DangerLevel == 0 || selectedProduct.DangerLevel == 1 || selectedProduct.DangerLevel == 2)
+                {
+                    // Only add link for certain danger levels
+                    linkHtml = "<div style='margin-top: auto;'><a href='https://giftinformation.se/searchpage/?query=&page=1'>Läs mer på vår hemsida</a></div>";
+                }
+
+                string htmlContent = $@"
+        <div style='display: flex; flex-direction: column; justify-content: flex-start; background-color: {colorHex}; font-size: 20px; padding: 20px; min-height: 250px; box-shadow: 0px 8px 12px rgba(0,0,0,0.2);'>
+            <div>{matchingDescription.DescriptionText}</div>
+            {linkHtml} 
+        </div>";
 
                 // Show the WebView
                 DescriptionText.IsVisible = true;
@@ -222,6 +232,16 @@ namespace GIC
                 // Handle case where no matching description is found
                 DescriptionText.Source = "No description available";
                 SuggestionResults.IsVisible = false;
+            }
+        }
+
+
+        private async void OnNavigating(object sender, WebNavigatingEventArgs e)
+        {
+            if (e.NavigationEvent == WebNavigationEvent.NewPage)
+            {
+                e.Cancel = true;  // Prevent the WebView from navigating
+                await Launcher.OpenAsync(new Uri(e.Url));  // Open the URL externally
             }
         }
 
@@ -383,7 +403,7 @@ namespace GIC
                     SuggestionResults.ItemsSource = typoSuggestions;
                     SuggestionResults.IsVisible = true;
                     AmountOfHits.IsVisible = true;
-                    AmountOfHits.Text = $"Ingen träff på din sökning \"{searchText}\" menade du: ";
+                    AmountOfHits.Text = $"Ingen träff på din sökning \"{searchText}\". Menade du: ";
 
                 }
             }
