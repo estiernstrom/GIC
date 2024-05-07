@@ -17,11 +17,11 @@ namespace GIC.Utilities
             return dangerLevel switch
             {
                 0 => "#ebedec",
-                1 => "#ddecc5",
-                2 => "#d2e6d2",
-                3 => "#cddcf0",
-                4 => "#fee4a5",
-                5 => "#d68c45",
+                1 => "#95E214",
+                2 => "#72CE27",
+                3 => "#FFF700",
+                4 => "#FFE000",
+                5 => "#FF9900",
                 6 => "#c41b1b",
                 _ => "#808080",
             };
