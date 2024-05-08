@@ -24,7 +24,7 @@ namespace GIC.Utilities
 
             if (status == PermissionStatus.Granted)
             {
-                bool isConfirmed = await page.DisplayAlert("Call Emergency", "Are you sure you want to call the emergency number 112?", "Yes", "No");
+                bool isConfirmed = await page.DisplayAlert("Nödnummer", "Vill du verkligen ringa nödnummret 112?", "Ja", "Nej");
                 if (isConfirmed)
                 {
 #if ANDROID

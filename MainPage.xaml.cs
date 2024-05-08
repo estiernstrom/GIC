@@ -147,10 +147,11 @@ namespace GIC
             {
                 // Construct HTML with dynamic background color
                 string htmlContent = $"<div style='background-color: {000}>";
-          
-               
+
+
 
                 // Set the HTML content of the WebView
+
                 DescriptionText.Source = new HtmlWebViewSource
                 {
                     Html = htmlContent
@@ -160,7 +161,7 @@ namespace GIC
                 DescriptionHeaderLabel.IsVisible = false;
                 DescriptionText.IsVisible = false;
                 SuggestionLabel.IsVisible = false;
-               
+
                 AmountOfHits.IsVisible = false;
             }
 
@@ -202,7 +203,7 @@ namespace GIC
             {
                 // Construct HTML with dynamic background color and potentially a link
                 string linkHtml = "";
-                if (selectedProduct.DangerLevel == 0 || selectedProduct.DangerLevel == 1 || selectedProduct.DangerLevel == 2)
+                if (selectedProduct.DangerLevel == 0 || selectedProduct.DangerLevel == 1 || selectedProduct.DangerLevel == 2 )
                 {
                     // Only add link for certain danger levels
                     linkHtml = "<div style='margin-top: auto;'><a href='https://giftinformation.se/searchpage/?query=&page=1'>Läs mer på vår hemsida</a></div>";
@@ -375,7 +376,7 @@ namespace GIC
                 // No matches found, display a message
                 AmountOfHits.IsVisible = true;
                 AmountOfHits.Text = $"Hittade 0 träffar på din sökning: {searchText}.";
-
+                //DisplayNoResultsMessage(searchText);
                 SuggestionLabel.IsVisible = false;
                 SuggestionResults.IsVisible = false;
                 ProductSearchBar.Focus();
@@ -409,7 +410,34 @@ namespace GIC
             }
             ProductSearchBar.Unfocus();
         }
+//        private void DisplayNoResultsMessage(string searchText)
+//        {
+//            string htmlContent = $@"
+//<div style='display: flex; flex-direction: column; justify-content: center; align-items: center; font-size: 16px; padding: 20px;'>
+//    <div>Inga resultat hittades för sökningen: <b>{searchText}</b></div>
+//<br>
 
+//Tyvärr hittades inget alternativ till din sökning.
+//<br>
+//<br>
+//Ring Giftinformationscentralen: 010-456 67 00
+//<br>
+//<br>
+//Eller besök vår hemsida på länken nedan:
+//<br>
+//    <div style='margin-top: 20px;'><a href='https://giftinformation.se/searchpage/?query=&page=1'>Läs mer på vår hemsida</a></div>
+//</div>";
+
+//            // Assuming DescriptionText is a WebView or similar control that can display HTML
+//            DescriptionText.Source = new HtmlWebViewSource
+//            {
+//                Html = htmlContent
+//            };
+
+//            DescriptionText.IsVisible = true;
+//            SuggestionResults.IsVisible = false;
+//            AmountOfHits.IsVisible = false; // Optionally hide or show this as per design needs
+//        }
         private class FilteredProduct
         {
             public string NormalizedName { get; set; }
@@ -458,7 +486,7 @@ namespace GIC
             {
                 // If there's exactly one match and it is an exact match, display its description
                 DisplayDescription(filteredProducts.First().Product);
-              /*  return new List<string>();*/ // Return empty list as no need for further suggestions.
+                 /*  return new List<string>();*/ // Return empty list as no need for further suggestions.
             }
 
             // Return suggestions based on the closest Levenshtein matches
