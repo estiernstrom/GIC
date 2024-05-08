@@ -247,7 +247,6 @@ namespace GIC
         }
 
 
-
         private void OnSelectedProductInList(object sender, SelectionChangedEventArgs e)
         {
             var selectedProductName = e.CurrentSelection.FirstOrDefault() as string; // Assuming the items are strings
@@ -277,48 +276,6 @@ namespace GIC
 
 
 
-        // Event handler for SearchButtonClicked
-        //private void OnSearchButtonClicked(object sender, EventArgs e)
-        //{
-        //    string? searchText = ProductSearchBar.Text?.Trim();  // Assuming you have a SearchBar named ProductSearchBar
-        //    if (string.IsNullOrEmpty(searchText))
-        //    {
-        //        DescriptionText.Source = "Please enter a product name to search.";
-        //        return;
-        //    }
-
-        //    // Find the product matching the search text (case-insensitive match)
-        //    var selectedProduct = _allProducts.FirstOrDefault(p => p.Name.Equals(searchText, StringComparison.OrdinalIgnoreCase));
-
-        //    if (selectedProduct == null)
-        //    {
-        //        // No exact match found, perform fuzzy search
-        //        var bestMatch = Process.ExtractOne(searchText, _allProducts.Select(p => p.Name).ToList());
-
-        //        if (bestMatch != null && bestMatch.Score >= 80) // Adjust the score threshold as needed
-        //        {
-        //            // Display a message suggesting the best match
-        //            AmountOfHits.IsVisible = true;
-        //            AmountOfHits.Text = $"Hittade 0 träffar på din sökning {searchText}.";
-        //            DidYouMeanLabel.IsVisible = true;
-        //            SuggestionLabel.Text = bestMatch.Value;
-        //            SuggestionLabel.IsVisible = true; // Show the suggestion label
-        //            SuggestionResults.IsVisible = false;
-        //            return;
-        //        }
-        //        else
-        //        {
-        //            // No close match found, display a message
-        //            AmountOfHits.IsVisible = true;
-        //            AmountOfHits.Text = $"Hittade 0 träffar på din sökning {searchText}.";
-        //            return;
-        //        }
-        //    }
-
-        //    // Call the method to display the description
-        //    DisplayDescription(selectedProduct);
-        //    ProductSearchBar.Unfocus();
-        //}
 
         // Event handler for tapping on the suggestion label
         private void OnSuggestionLabelTapped(object sender, EventArgs e)
@@ -336,12 +293,11 @@ namespace GIC
                     ProductSearchBar.Text = selectedProduct.Name;
                     DisplayDescription(selectedProduct);
                     SuggestionLabel.IsVisible = false;
-                   
+
                 }
-              
+
             }
         }
-
 
 
 
@@ -357,6 +313,7 @@ namespace GIC
         }
 
 
+
         private void OnSearchButtonClicked(object sender, EventArgs e)
         {
             string searchText = ProductSearchBar.Text?.Trim();  // Assuming you have a SearchBar named ProductSearchBar
@@ -369,29 +326,16 @@ namespace GIC
 
             // Use Levenshtein distance to find the best matches
             var matches = SearchProductsUsingLevenshteinAndConcat(searchText);
-
-
-            if (matches.Count == 0)
-            {
-                // No matches found, display a message
-                AmountOfHits.IsVisible = true;
-                AmountOfHits.Text = $"Hittade 0 träffar på din sökning: {searchText}.";
-                //DisplayNoResultsMessage(searchText);
-                SuggestionLabel.IsVisible = false;
-                SuggestionResults.IsVisible = false;
-                ProductSearchBar.Focus();
-            }
             if (matches.Count == 1)
             {
                 // One match found, display its description
                 DisplayDescription(_allProducts.FirstOrDefault(p => p.Name == matches.First()));
             }
-            else if(matches.Count > 1) 
+            else if (matches.Count > 1)
             {
                 // Multiple matches found, suggest the top matches
                 SuggestionResults.ItemsSource = matches;
                 SuggestionResults.IsVisible = true;
-              
                 AmountOfHits.IsVisible = true;
                 AmountOfHits.Text = $"Hittade {matches.Count} matchningar på din sökning:";
             }
@@ -407,37 +351,46 @@ namespace GIC
                     AmountOfHits.Text = $"Ingen träff på din sökning \"{searchText}\". Menade du: ";
 
                 }
+                else
+                {
+                    DisplayNoResultsMessage(searchText);
+                }
             }
             ProductSearchBar.Unfocus();
+
         }
-//        private void DisplayNoResultsMessage(string searchText)
-//        {
-//            string htmlContent = $@"
-//<div style='display: flex; flex-direction: column; justify-content: center; align-items: center; font-size: 16px; padding: 20px;'>
-//    <div>Inga resultat hittades för sökningen: <b>{searchText}</b></div>
-//<br>
 
-//Tyvärr hittades inget alternativ till din sökning.
-//<br>
-//<br>
-//Ring Giftinformationscentralen: 010-456 67 00
-//<br>
-//<br>
-//Eller besök vår hemsida på länken nedan:
-//<br>
-//    <div style='margin-top: 20px;'><a href='https://giftinformation.se/searchpage/?query=&page=1'>Läs mer på vår hemsida</a></div>
-//</div>";
 
-//            // Assuming DescriptionText is a WebView or similar control that can display HTML
-//            DescriptionText.Source = new HtmlWebViewSource
-//            {
-//                Html = htmlContent
-//            };
 
-//            DescriptionText.IsVisible = true;
-//            SuggestionResults.IsVisible = false;
-//            AmountOfHits.IsVisible = false; // Optionally hide or show this as per design needs
-//        }
+
+        private void DisplayNoResultsMessage(string searchText)
+        {
+            string htmlContent = $@"
+                        <div style='display: flex; flex-direction: column; font-size: 16px; padding: 20px; margin-top: 20px; background-color: rgb(0, 127, 143); color: white; box-shadow: 0px 8px 12px rgba(0,0,0,0.2);'>
+                            <div>Tyvärr hittades inga resultat för sökningen: <b>{searchText}</b></div>
+                        <br>
+                        <br>
+                        För mer information:
+                        <br>
+                        <br>
+                        Ring Giftinformationscentralen: 010-456 67 00
+                        <br>
+                        <br>
+                        Eller besök vår hemsida på länken nedan:
+                        <br>
+                            <div style='margin-top: 20px;'><a href='https://giftinformation.se/searchpage/?query=&page=1' style='color: #FFFFFF;'>Läs mer på vår hemsida</a></div>
+                        </div>";
+
+            // Assuming DescriptionText is a WebView or similar control that can display HTML
+            DescriptionText.Source = new HtmlWebViewSource
+            {
+                Html = htmlContent
+            };
+
+            DescriptionText.IsVisible = true;
+            SuggestionResults.IsVisible = false;
+            AmountOfHits.IsVisible = false; // Optionally hide or show this as per design needs
+        }
         private class FilteredProduct
         {
             public string NormalizedName { get; set; }
