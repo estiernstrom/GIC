@@ -203,11 +203,11 @@ namespace GIC
             {
                 // Construct HTML with dynamic background color and potentially a link
                 string linkHtml = "";
-                if (selectedProduct.DangerLevel == 0 || selectedProduct.DangerLevel == 1 || selectedProduct.DangerLevel == 2 )
+                if (selectedProduct.DangerLevel == 0 || selectedProduct.DangerLevel == 1 || selectedProduct.DangerLevel == 2 || selectedProduct.DangerLevel == 3)
                 {
-                    // Only add link for certain danger levels
                     linkHtml = "<div style='margin-top: auto;'><a href='https://giftinformation.se/searchpage/?query=&page=1'>Läs mer på vår hemsida</a></div>";
                 }
+
 
                 string htmlContent = $@"
         <div style='display: flex; flex-direction: column; justify-content: flex-start; background-color: {colorHex}; font-size: 20px; padding: 20px; min-height: 250px; box-shadow: 0px 8px 12px rgba(0,0,0,0.2);'>
