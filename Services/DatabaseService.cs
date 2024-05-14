@@ -7,6 +7,7 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Xml;
 using Microsoft.Maui.Storage;
+using Microsoft.Maui.Devices;
 using GIC.Models;
 
 namespace GIC
