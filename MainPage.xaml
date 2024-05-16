@@ -126,7 +126,10 @@
                 </Grid>
             </Frame>
 
-
+            <Button Text="Scan Barcode"
+                VerticalOptions="Center"
+                HorizontalOptions="Center"
+                Clicked="NavigateToBarcodeScannerPage"/>
 
             <!-- Custom Button for Emergency Calls -->
             <Frame CornerRadius="5" BackgroundColor="#c41b1b" Padding="10" Margin="10" HasShadow="true" Shadow="{StaticResource MyShadowStyle}">

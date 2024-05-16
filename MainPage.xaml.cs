@@ -7,6 +7,7 @@ using Microsoft.Maui.Controls;
 using FuzzySharp;
 using GIC.Utilities;
 using GIC.Models;
+using GIC.Views;
 using System.ComponentModel;
 using System.Text.RegularExpressions;
 #if ANDROID
@@ -516,6 +517,13 @@ namespace GIC
 
             return distance[sourceLength, targetLength];
         }
+
+
+        private async void NavigateToBarcodeScannerPage(object sender, EventArgs e)
+        {
+            await Navigation.PushAsync(new BarcodeScannerPage());
+        }
+
 
     }
 
