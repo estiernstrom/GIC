@@ -20,7 +20,7 @@ namespace GIC
 {
     public partial class MainPage : ContentPage
     {
-
+        private Dictionary<string, string> _barcodeToSearchTermMap;
         private List<Product> _allProducts;
         private List<Description> _descriptions;
         private DatabaseService _databaseService;
@@ -38,10 +38,25 @@ namespace GIC
             phoneCallHelper = new PhoneCall();
             _allProducts = new List<Product>();
             _descriptions = new List<Description>();
+
+            BarcodeDictionary();
+
             InitializeAsync();
             
-
         }
+        private void BarcodeDictionary()
+        {
+
+            _barcodeToSearchTermMap = new Dictionary<string, string>
+        {
+            { "7320081190302", "Ättika" },
+                {"8711800118476", "Ugnsrengöring"},
+                {"8700216240185", "Maskindiskmedel" },
+                   {"7322337060193", "Handsprit" },
+                {"7310200000025", "Aceton" }
+        };
+        }
+
         private async void InitializeAsync()
         {
             await InitializeDataAsync();
@@ -521,8 +536,30 @@ namespace GIC
 
         private async void NavigateToBarcodeScannerPage(object sender, EventArgs e)
         {
-            await Navigation.PushAsync(new BarcodeScannerPage());
+            var scanResultCompletionSource = new TaskCompletionSource<string>();
+            await Navigation.PushAsync(new BarcodeScannerPage(scanResultCompletionSource));
+
+            var scanResult = await scanResultCompletionSource.Task;
+
+            if (!string.IsNullOrEmpty(scanResult))
+            {
+                // Check if the scanned barcode exists in the mapping
+                if (_barcodeToSearchTermMap.TryGetValue(scanResult, out string searchTerm))
+                {
+                    // If the barcode is found in the mapping, use the corresponding search term
+                    ProductSearchBar.Text = searchTerm;
+                }
+                else
+                {
+                    // If the barcode is not found in the mapping, use the scanned value as the search term
+                    ProductSearchBar.Text = scanResult;
+                }
+
+                // Trigger the search
+                OnSearchButtonClicked(this, EventArgs.Empty);
+            }
         }
+
 
 
     }

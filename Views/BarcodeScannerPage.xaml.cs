@@ -4,6 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using ZXing;
+using ZXing.Net.Maui;
 
 
 namespace GIC.Views
@@ -11,32 +12,36 @@ namespace GIC.Views
     [XamlCompilation(XamlCompilationOptions.Compile)]
     public partial class BarcodeScannerPage : ContentPage
     {
-        public BarcodeScannerPage()
+        private TaskCompletionSource<string> _scanResultCompletionSource;
+        private bool _isBarcodeDetected;
+
+        public BarcodeScannerPage(TaskCompletionSource<string> scanResultCompletionSource)
         {
             InitializeComponent();
+            _scanResultCompletionSource = scanResultCompletionSource;
+            _isBarcodeDetected = false;
 
-            barcodeReader.Options = new ZXing.Net.Maui.BarcodeReaderOptions
+            barcodeReader.Options = new BarcodeReaderOptions
             {
                 Formats = ZXing.Net.Maui.BarcodeFormat.Ean13,
                 AutoRotate = true,
-                Multiple = true
+                //Multiple = true
             };
         }
 
-        private void barcodeReader_BarcodesDetected(object sender, ZXing.Net.Maui.BarcodeDetectionEventArgs e)
+        private void barcodeReader_BarcodesDetected(object sender, BarcodeDetectionEventArgs e)
         {
             var first = e.Results?.FirstOrDefault();
 
             if (first is null)
                 return;
-
-            Dispatcher.DispatchAsync(async () =>
+            _isBarcodeDetected = true;
+            Dispatcher.Dispatch(async () =>
             {
-                await DisplayAlert("Barcode Detected", first.Value, "OK");
+                //await DisplayAlert("Barcode Detected", first.Value, "OK");
+                _scanResultCompletionSource.TrySetResult(first.Value);
+                await Navigation.PopAsync(); // Navigate back to MainPage
             });
         }
-
-
-
     }
 }
