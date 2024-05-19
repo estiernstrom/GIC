@@ -53,6 +53,7 @@ namespace GIC
                 {"8711800118476", "Ugnsrengöring"},
                 {"8700216240185", "Maskindiskmedel" },
                    {"7322337060193", "Handsprit" },
+                   {"6972104523461", "E-cigaretter" },
                 {"7310200000025", "Aceton" }
         };
         }
@@ -560,7 +561,11 @@ namespace GIC
             }
         }
 
-
+        protected override void OnAppearing()
+        {
+            base.OnAppearing();
+            ProductSearchBar.Focus();
+        }
 
     }
 

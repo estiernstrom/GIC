@@ -3,10 +3,37 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
              x:Class="GIC.Views.BarcodeScannerPage"
              xmlns:zxing="clr-namespace:ZXing.Net.Maui.Controls;assembly=ZXing.Net.MAUI.Controls">
-    <StackLayout VerticalOptions="FillAndExpand" HorizontalOptions="FillAndExpand">
+    <Grid VerticalOptions="FillAndExpand" HorizontalOptions="FillAndExpand">
         <!-- ZXing CameraBarcodeReaderView -->
         <zxing:CameraBarcodeReaderView
             x:Name="barcodeReader"
-            BarcodesDetected="barcodeReader_BarcodesDetected"/>
-    </StackLayout>
+            BarcodesDetected="barcodeReader_BarcodesDetected"
+            VerticalOptions="FillAndExpand"
+            HorizontalOptions="FillAndExpand"/>
+
+        <!-- Aiming Square Overlay -->
+        <ContentView HorizontalOptions="Center"
+                     VerticalOptions="Center"
+                     WidthRequest="200"
+                     HeightRequest="200"
+                     BackgroundColor="Transparent">
+            <Frame BorderColor="Red"
+                   CornerRadius="0"
+                   HorizontalOptions="FillAndExpand"
+                   VerticalOptions="FillAndExpand"
+                   BackgroundColor="Transparent"
+                   Padding="0">
+            </Frame>
+        </ContentView>
+
+        <!-- Back Button -->
+        <Button Text="Tillbaka" 
+                Clicked="OnBackButtonClicked"
+                HorizontalOptions="Start"
+                VerticalOptions="Start"
+                Margin="10"
+                BackgroundColor="#d63868"
+                TextColor="White"
+                />
+    </Grid>
 </ContentPage>

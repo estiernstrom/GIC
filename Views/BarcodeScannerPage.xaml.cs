@@ -43,5 +43,12 @@ namespace GIC.Views
                 await Navigation.PopAsync(); // Navigate back to MainPage
             });
         }
+
+        private async void OnBackButtonClicked(object sender, EventArgs e)
+        {
+      
+            await Navigation.PopAsync();
+        }
+
     }
 }

@@ -16,29 +16,37 @@
             <Image Source="gic_logo.png"
                    Margin="0,10,0,10" HeightRequest="100"/>
             <Grid HorizontalOptions="CenterAndExpand">
+                
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition Width="Auto"/>
                     <ColumnDefinition Width="Auto"/>
-                </Grid.ColumnDefinitions>
-                <Border Grid.Column="0" Stroke="#143c64" StrokeThickness="1">
+                        <ColumnDefinition Width="Auto"/>
+                    </Grid.ColumnDefinitions>
+                    <Button BackgroundColor="Transparent" Grid.Column="0"
+                             Padding="0,0,5,0"
+                             HorizontalOptions="Start"
+                             Clicked="NavigateToBarcodeScannerPage"
+                             ImageSource="barcode_scan.png" /> 
+                
+                    <Border Grid.Column="1" Stroke="#143c64" StrokeThickness="1" MaximumHeightRequest="50">
                     <SearchBar x:Name="ProductSearchBar"
                                Placeholder="Sök produkt . . ."
                                HeightRequest="40"
-                               WidthRequest="290"
+                               WidthRequest="250"
                                TextChanged="OnTextChanged"
-                               FontSize="25"
+                               FontSize="20"
                              SearchButtonPressed="OnSearchButtonClicked"
                                />
                 </Border>
-                <Button Grid.Column="1" x:Name="SearchButton" 
+                <Button Grid.Column="2" x:Name="SearchButton" 
                         Text="Sök"
                         CornerRadius="2"
                         BackgroundColor="#d63868"
-                        WidthRequest="80"
+                        WidthRequest="70"
                         HeightRequest="50"
                         TextColor="White"
                         Clicked="OnSearchButtonClicked"
-                        FontSize="25"
+                        FontSize="20"
                         Padding="0"
                         />   
             </Grid>
@@ -76,7 +84,7 @@
                 </Label.GestureRecognizers>
             </Label>
 
-            <Frame BorderColor="LightGray" Padding="10,2,10,10" Margin="10,0,90,0"   WidthRequest="290" HasShadow="False" CornerRadius="5" IsVisible="{Binding IsVisible, Source={x:Reference SuggestionResults}}">
+            <Frame BorderColor="LightGray" Padding="10,2,10,10" Margin="60,0,75,0"   WidthRequest="250" HasShadow="False" CornerRadius="5" IsVisible="{Binding IsVisible, Source={x:Reference SuggestionResults}}">
                 <CollectionView x:Name="SuggestionResults" SelectionMode="Single" SelectionChanged="OnSelectedProductInList" IsVisible="False" MaximumHeightRequest="250">
                     <CollectionView.ItemTemplate>
                         <DataTemplate>
@@ -93,7 +101,7 @@
                                         </VisualStateGroup>
                                     </VisualStateGroupList>
                                 </VisualStateManager.VisualStateGroups>
-                                <Label Text="{Binding .}" FontSize="25" />
+                                <Label Text="{Binding .}" FontSize="20" />
                             </Grid>
                         </DataTemplate>
                     </CollectionView.ItemTemplate>
@@ -126,10 +134,7 @@
                 </Grid>
             </Frame>
 
-            <Button Text="Scan Barcode"
-                VerticalOptions="Center"
-                HorizontalOptions="Center"
-                Clicked="NavigateToBarcodeScannerPage"/>
+           
 
             <!-- Custom Button for Emergency Calls -->
             <Frame CornerRadius="5" BackgroundColor="#c41b1b" Padding="10" Margin="10" HasShadow="true" Shadow="{StaticResource MyShadowStyle}">
