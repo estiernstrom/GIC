@@ -10,6 +10,7 @@ using GIC.Models;
 using GIC.Views;
 using System.ComponentModel;
 using System.Text.RegularExpressions;
+using ZXing.Common.Detector;
 #if ANDROID
 using Android.Content;
 using Android.App.AppSearch;
@@ -366,7 +367,8 @@ namespace GIC
                     SuggestionResults.IsVisible = true;
                     AmountOfHits.IsVisible = true;
                     AmountOfHits.Text = $"Ingen träff på din sökning \"{searchText}\". Menade du: ";
-
+                    DisplayNoResultsMessage(searchText);
+                  
                 }
                 else
                 {
@@ -395,7 +397,7 @@ namespace GIC
                         <br>
                         Eller besök vår hemsida på länken nedan:
                         <br>
-                            <div style='margin-top: 20px;'><a href='https://giftinformation.se/searchpage/?query=&page=1' style='color: #FFFFFF;'>Läs mer på vår hemsida</a></div>
+                            <div style='margin-top: 20px;'><a href='https://giftinformation.se/searchpage/?query={searchText}&page=1/' style='color: #FFFFFF;'>Läs mer på vår hemsida</a></div>
                         </div>";
 
             // Assuming DescriptionText is a WebView or similar control that can display HTML
@@ -405,8 +407,8 @@ namespace GIC
             };
 
             DescriptionText.IsVisible = true;
-            SuggestionResults.IsVisible = false;
-            AmountOfHits.IsVisible = false; // Optionally hide or show this as per design needs
+            //SuggestionResults.IsVisible = false;
+            //AmountOfHits.IsVisible = false; // Optionally hide or show this as per design needs
         }
         private class FilteredProduct
         {
@@ -564,7 +566,7 @@ namespace GIC
         protected override void OnAppearing()
         {
             base.OnAppearing();
-            ProductSearchBar.Focus();
+            ProductSearchBar.Unfocus();
         }
 
     }

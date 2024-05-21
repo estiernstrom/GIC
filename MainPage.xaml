@@ -67,11 +67,7 @@
                    
                    />
             
-                <WebView x:Name="DescriptionText" 
-                         IsVisible="false"
-                         WidthRequest="385"
-                         Navigating="OnNavigating">
-                </WebView>
+              
           
             <Label x:Name="SuggestionLabel" 
                    TextColor="Blue" 
@@ -84,7 +80,7 @@
                 </Label.GestureRecognizers>
             </Label>
 
-            <Frame BorderColor="LightGray" Padding="10,2,10,10" Margin="60,0,75,0"   WidthRequest="250" HasShadow="False" CornerRadius="5" IsVisible="{Binding IsVisible, Source={x:Reference SuggestionResults}}">
+                <Frame x:Name="SuggestionFrame" BorderColor="LightGray" Padding="10,2,10,10" Margin="60,0,75,0"   WidthRequest="250" HasShadow="False" CornerRadius="5" IsVisible="{Binding IsVisible, Source={x:Reference SuggestionResults}}">
                 <CollectionView x:Name="SuggestionResults" SelectionMode="Single" SelectionChanged="OnSelectedProductInList" IsVisible="False" MaximumHeightRequest="250">
                     <CollectionView.ItemTemplate>
                         <DataTemplate>
@@ -107,8 +103,14 @@
                     </CollectionView.ItemTemplate>
                 </CollectionView>
             </Frame>
-       
-        </VerticalStackLayout>
+            
+                <WebView x:Name="DescriptionText" 
+           IsVisible="false"
+           WidthRequest="385"
+           Navigating="OnNavigating">
+                </WebView>
+            
+            </VerticalStackLayout>
         
     </ScrollView>
         <VerticalStackLayout Grid.Row="1" VerticalOptions="End">

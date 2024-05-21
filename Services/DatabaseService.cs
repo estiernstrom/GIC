@@ -29,13 +29,13 @@ namespace GIC
                 if (DeviceInfo.Model.Contains("Emulator"))
                 {
                     // Connection string for Android emulator
-                    ConnectionString = "Host=10.0.2.2;Port=5432;Username=postgres;Password=Edgar20230414!;Database=giftinformationscentralendb";
+                    ConnectionString = "Host=10.0.2.2;Port=5432;Username=readonly_user;Password=readonly_user;Database=giftinformationscentralendb";
                     System.Diagnostics.Debug.WriteLine("Detected Android Emulator.");
                 }
                 else
                 {
                     // Connection string for Android physical device
-                    ConnectionString = "Host=192.168.0.125;Port=5432;Username=postgres;Password=Edgar20230414!;Database=giftinformationscentralendb";
+                    ConnectionString = "Host=192.168.0.125;Port=5432;Username=readonly_user;Password=readonly_user;Database=giftinformationscentralendb";
                     System.Diagnostics.Debug.WriteLine("Detected Android Physical Device.");
                 }
             }
