@@ -223,7 +223,7 @@ namespace GIC
                 string linkHtml = "";
                 if (selectedProduct.DangerLevel == 0 || selectedProduct.DangerLevel == 1 || selectedProduct.DangerLevel == 2 || selectedProduct.DangerLevel == 3)
                 {
-                    linkHtml = "<div style='margin-top: auto;'><a href='https://giftinformation.se/searchpage/?query=&page=1'>Läs mer på vår hemsida</a></div>";
+                    linkHtml = $@"<div style='margin-top: auto;'><a href='https://giftinformation.se/searchpage/?query={selectedProduct.Name}&page=1'>Läs mer på vår hemsida</a></div>";
                 }
 
 
